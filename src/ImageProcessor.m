@@ -42,11 +42,28 @@ classdef ImageProcessor
             result = im2double(image);
             [row,col]=size(result);
 
-            for i=1:row
-                for j=1:col
-                    result(i,j)= c*log(result(i,j) + 1);
+            for i = 1:row
+                for j = 1:col
+                    result(i,j) = c * log(result(i,j) + 1);
                 end
             end
+        end
+
+        function result = powerTransformation(~, image, c, gamma)
+            result = im2double(image);
+            [row,col] =size(result);
+
+            for i = 1:row
+                for j = 1:col
+                    result(i,j) = c * (result(i,j)^gamma);
+                end
+            end
+        end
+
+        function result = contrastStretching(~, image)
+            rmin = min(image(:));
+            rmax = max(image(:));
+            result = (image - rmin) .* (255 / (rmax - rmin));
         end
     end
 end
