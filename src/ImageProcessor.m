@@ -40,30 +40,40 @@ classdef ImageProcessor
 
         function result = logTransformation(~, image, c)
             result = im2double(image);
-            [row,col]=size(result);
-
-            for i = 1:row
-                for j = 1:col
-                    result(i,j) = c * log(result(i,j) + 1);
-                end
-            end
+            result = c * log(result + 1);
+            result = im2uint8(result);
         end
 
         function result = powerTransformation(~, image, c, gamma)
             result = im2double(image);
-            [row,col] =size(result);
-
-            for i = 1:row
-                for j = 1:col
-                    result(i,j) = c * (result(i,j)^gamma);
-                end
-            end
+            result = c * (result^gamma);
+            result = im2uint8(result);
         end
 
         function result = contrastStretching(~, image)
             rmin = min(image(:));
             rmax = max(image(:));
             result = (image - rmin) .* (255 / (rmax - rmin));
+        end
+
+        function result = histogramEqualization(~, image)
+            imageHistogram = calculateGrayscaledHistogram(image);
+            [row, col] = size(image);
+            n = row * col;
+            eqHistogram = zeros(1, 256);
+
+            sum = 0;
+            for i = 1:256
+                sum = sum + imageHistogram(i);
+                eqHistogram(i) = floor((double(sum) / n) * 255);
+            end
+
+            result = image;
+            for i = 1:row
+                for j = 1:col
+                    result(i, j) = eqHistogram(image(i, j) + 1) ;
+                end
+            end
         end
     end
 end
