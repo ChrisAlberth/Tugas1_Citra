@@ -34,10 +34,6 @@ classdef ImageProcessor
             result = 255 - image;
         end
 
-        function result = imageNegativeInversed(~, image)
-            result = 255 - (255 - image);
-        end
-
         function result = logTransformation(~, image, c)
             result = im2double(image);
             result = c * log(result + 1);
@@ -46,7 +42,7 @@ classdef ImageProcessor
 
         function result = powerTransformation(~, image, c, gamma)
             result = im2double(image);
-            result = c * (result^gamma);
+            result = c * (result.^gamma);
             result = im2uint8(result);
         end
 
@@ -56,8 +52,8 @@ classdef ImageProcessor
             result = (image - rmin) .* (255 / (rmax - rmin));
         end
 
-        function result = histogramEqualization(~, image)
-            imageHistogram = calculateGrayscaledHistogram(image);
+        function result = histogramEqualization(self, image)
+            imageHistogram = self.calculateGrayscaledHistogram(image);
             [row, col] = size(image);
             n = row * col;
             eqHistogram = zeros(1, 256);
@@ -72,6 +68,51 @@ classdef ImageProcessor
             for i = 1:row
                 for j = 1:col
                     result(i, j) = eqHistogram(image(i, j) + 1) ;
+                end
+            end
+        end
+
+        function result = histogramSpecification(self, image, ref)
+            [row, col] = size(image);
+            n = row * col;
+
+            imageHistogram = self.calculateGrayscaledHistogram(image);
+            imageEqHist = zeros(1, 256);
+
+            sum = 0;
+            for i = 1:256
+                sum = sum + imageHistogram(i);
+                imageEqHist(i) = floor((double(sum) / n) * 255);
+            end
+
+            refHistogram = self.calculateGrayscaledHistogram(ref);
+            refEqHist = zeros(1, 256);
+
+            sum = 0;
+            for i = 1:256
+                sum = sum + refHistogram(i);
+                refEqHist(i) = floor((double(sum) / n) * 255);
+            end
+    
+            invHist = zeros(1, 256);
+            for i = 1:row
+                minVal = abs(imageEqHist(i) - refEqHist(1));
+                minJ = 0;
+
+                for j = 1:256
+                    if (abs(imageEqHist(i) - refEqHist(j)) < minVal)
+                        minVal = abs(imageEqHist(i) - refEqHist(j));
+                        minJ = j;
+                    end
+                end
+
+                invHist(i) = minJ;
+            end
+    
+            result = image;
+            for i = 1:row
+                for j = 1:col
+                    result(i, j) = invHist(image(i, j) + 1) ;
                 end
             end
         end
