@@ -96,12 +96,13 @@ classdef ImageProcessor
     
             invHist = zeros(1, 256);
             for i = 1:row
-                minVal = abs(imageEqHist(i) - refEqHist(1));
+                disp(max(i/(row/256), 1));
+                minVal = abs(imageEqHist(uint8(max(i/(row/256), 1))) - refEqHist(1));
                 minJ = 0;
 
                 for j = 1:256
-                    if (abs(imageEqHist(i) - refEqHist(j)) < minVal)
-                        minVal = abs(imageEqHist(i) - refEqHist(j));
+                    if (abs(imageEqHist(uint8(max(i/(row/256), 1))) - refEqHist(j)) < minVal)
+                        minVal = abs(imageEqHist(uint8(max(i/(row/256), 1))) - refEqHist(j));
                         minJ = j;
                     end
                 end
